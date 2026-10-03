@@ -2,1473 +2,768 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>🎣 낚시 게임</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>온라인 낚시게임</title>
 
 <style>
 *{
-    box-sizing:border-box;
-    -webkit-tap-highlight-color:transparent;
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
 }
 
-html,body{
-    margin:0;
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    font-family:Arial,"Malgun Gothic",sans-serif;
-    background:#071b2e;
-    color:white;
+body{
+  margin:0;
+  font-family:Arial,"Malgun Gothic",sans-serif;
+  background:#071b2d;
+  color:white;
+  overflow:hidden;
 }
 
 button{
-    font-family:inherit;
-    cursor:pointer;
-    border:0;
+  border:0;
+  border-radius:12px;
+  padding:12px 18px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+  background:#168cff;
+  color:white;
 }
 
-.screen{
-    position:absolute;
-    inset:0;
-    display:none;
+button:hover{
+  filter:brightness(1.15);
 }
 
-.screen.active{
-    display:block;
+button:disabled{
+  opacity:.45;
+  cursor:not-allowed;
 }
 
-/* ================================
-   서버 선택
-================================ */
-
-#serverScreen{
-    display:none;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    background:
-        radial-gradient(circle at 50% 30%,#1688c7,#0a3b60 48%,#03111e);
+#modeScreen{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:
+    radial-gradient(circle at center,#126c9b 0%,#063653 45%,#03121f 100%);
+  z-index:100;
 }
 
-#serverScreen.active{
-    display:flex;
+.modeBox{
+  width:min(92%,600px);
+  text-align:center;
+  padding:35px 25px;
+  border-radius:25px;
+  background:rgba(0,0,0,.4);
+  box-shadow:0 0 40px rgba(0,0,0,.4);
 }
 
-.serverBox{
-    width:min(92vw,650px);
-    padding:35px 25px;
-    border-radius:25px;
-    background:rgba(0,0,0,.42);
-    border:2px solid rgba(255,255,255,.15);
-    box-shadow:0 20px 70px rgba(0,0,0,.5);
+.modeBox h1{
+  font-size:42px;
+  margin:0 0 10px;
 }
 
-.serverTitle{
-    font-size:clamp(40px,8vw,70px);
-    font-weight:900;
-    margin-bottom:10px;
+.modeBox p{
+  color:#ccecff;
+  margin-bottom:30px;
 }
 
-.serverSub{
-    opacity:.8;
-    margin-bottom:30px;
+.modeButtons{
+  display:flex;
+  gap:15px;
+  justify-content:center;
+  flex-wrap:wrap;
 }
 
-.serverButtons{
-    display:flex;
-    justify-content:center;
-    gap:18px;
-    flex-wrap:wrap;
-}
-
-.serverBtn{
-    width:230px;
-    padding:25px 15px;
-    border-radius:20px;
-    color:white;
-    font-size:24px;
-    font-weight:900;
-}
-
-.serverBtn:hover{
-    transform:translateY(-3px);
+.modeButtons button{
+  min-width:180px;
+  min-height:65px;
+  font-size:20px;
 }
 
 .privateBtn{
-    background:linear-gradient(135deg,#287cff,#1643b9);
+  background:#555;
 }
 
 .publicBtn{
-    background:linear-gradient(135deg,#18c985,#07845f);
+  background:#00a878;
 }
 
-.serverInfo{
-    margin-top:22px;
-    line-height:1.7;
-    font-size:14px;
-    opacity:.75;
+#nicknameBox{
+  display:none;
+  margin-top:20px;
 }
 
-/* ================================
-   닉네임
-================================ */
-
-#nicknameScreen{
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    background:linear-gradient(#0a3e62,#031522);
+#nickname{
+  width:100%;
+  max-width:350px;
+  padding:15px;
+  border-radius:12px;
+  border:0;
+  font-size:18px;
+  text-align:center;
+  margin-bottom:10px;
 }
 
-#nicknameScreen.active{
-    display:flex;
+#game{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:
+    linear-gradient(to bottom,#55cfff 0%,#1596c5 35%,#006b91 36%,#004b68 100%);
 }
 
-.nicknameBox{
-    width:min(90vw,500px);
-    padding:30px;
-    background:rgba(0,0,0,.4);
-    border-radius:22px;
+#topBar{
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  min-height:58px;
+  background:rgba(0,25,45,.82);
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:8px 12px;
+  z-index:20;
+  flex-wrap:wrap;
 }
 
-.nicknameBox h2{
-    font-size:35px;
+.stat{
+  background:rgba(255,255,255,.1);
+  border-radius:10px;
+  padding:8px 12px;
+  font-weight:bold;
 }
 
-.nicknameInput{
-    width:100%;
-    padding:17px;
-    border-radius:12px;
-    border:0;
-    outline:0;
-    font-size:20px;
-    text-align:center;
-    margin:15px 0;
+#serverStatus{
+  margin-left:auto;
+  font-size:13px;
 }
 
-.startPublic{
-    width:100%;
-    padding:16px;
-    border-radius:12px;
-    background:#19c983;
-    color:white;
-    font-size:21px;
-    font-weight:bold;
+.online{
+  color:#54ff9c;
 }
 
-/* ================================
-   게임
-================================ */
-
-#gameScreen{
-    background:
-        linear-gradient(
-            to bottom,
-            #63c8ff 0%,
-            #a8e6ff 34%,
-            #55b9df 35%,
-            #197baa 60%,
-            #06466e 100%
-        );
+.offline{
+  color:#ff7979;
 }
 
-.water{
-    position:absolute;
-    left:0;
-    right:0;
-    top:35%;
-    bottom:0;
-    background:
-        repeating-linear-gradient(
-            0deg,
-            rgba(255,255,255,.07) 0px,
-            rgba(255,255,255,.07) 3px,
-            transparent 3px,
-            transparent 28px
-        );
+#sea{
+  position:absolute;
+  left:0;
+  right:0;
+  top:58px;
+  bottom:0;
+  overflow:hidden;
 }
 
-.cloud{
-    position:absolute;
-    width:160px;
-    height:55px;
-    background:rgba(255,255,255,.75);
-    border-radius:60px;
-    opacity:.7;
+.wave{
+  position:absolute;
+  width:200%;
+  height:100px;
+  left:-50%;
+  border-radius:50%;
+  opacity:.12;
+  border-top:5px solid white;
+  animation:waveMove 8s linear infinite;
 }
 
-.cloud:before,
-.cloud:after{
-    content:"";
-    position:absolute;
-    background:white;
-    border-radius:50%;
+.wave:nth-child(1){top:20%;animation-duration:8s}
+.wave:nth-child(2){top:45%;animation-duration:11s}
+.wave:nth-child(3){top:70%;animation-duration:13s}
+
+@keyframes waveMove{
+  from{transform:translateX(-15%)}
+  to{transform:translateX(15%)}
 }
 
-.cloud:before{
-    width:70px;
-    height:70px;
-    left:25px;
-    top:-30px;
+#fishingArea{
+  position:absolute;
+  left:50%;
+  top:48%;
+  transform:translate(-50%,-50%);
+  width:min(90%,600px);
+  text-align:center;
 }
 
-.cloud:after{
-    width:85px;
-    height:85px;
-    right:20px;
-    top:-45px;
+#hook{
+  font-size:70px;
+  margin-bottom:10px;
 }
 
-.cloud1{
-    position:absolute;
-    left:5%;
-    top:12%;
+#fishMessage{
+  min-height:32px;
+  font-size:20px;
+  font-weight:bold;
+  text-shadow:0 2px 5px #003;
 }
 
-.cloud2{
-    position:absolute;
-    right:8%;
-    top:20%;
-    transform:scale(.7);
+#fishingButton{
+  width:min(90%,350px);
+  min-height:75px;
+  font-size:26px;
+  border-radius:20px;
+  background:#ff8c19;
+  box-shadow:0 8px 0 #b85000;
+  margin-top:20px;
 }
 
-.cloud3{
-    position:absolute;
-    left:45%;
-    top:8%;
-    transform:scale(.55);
+#fishingButton:active{
+  transform:translateY(5px);
+  box-shadow:0 3px 0 #b85000;
 }
 
-.dock{
-    position:absolute;
-    left:0;
-    top:35%;
-    bottom:0;
-    width:38%;
-    min-width:240px;
-    background:
-        repeating-linear-gradient(
-            90deg,
-            #754526 0px,
-            #754526 70px,
-            #63391e 70px,
-            #63391e 75px
-        );
-    box-shadow:inset -15px 0 30px rgba(0,0,0,.3);
+#gaugeWrap{
+  width:min(90%,500px);
+  height:25px;
+  background:#092d42;
+  border:2px solid white;
+  border-radius:20px;
+  margin:20px auto 0;
+  overflow:hidden;
 }
 
-.dock:after{
-    content:"";
-    position:absolute;
-    right:-25px;
-    top:0;
-    width:35px;
-    height:100%;
-    background:#3d2819;
+#gauge{
+  height:100%;
+  width:0%;
+  background:#45ff83;
+  transition:width .08s linear;
 }
 
-/* ================================
-   내 캐릭터
-================================ */
+#playerLayer{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
 
 .player{
-    position:absolute;
-    left:18%;
-    top:56%;
-    width:65px;
-    height:105px;
-    z-index:15;
-    transition:left .05s linear;
-}
-
-.playerHead{
-    width:42px;
-    height:42px;
-    margin:auto;
-    border-radius:50%;
-    background:#ffd2a6;
-    border:3px solid #422;
+  position:absolute;
+  width:60px;
+  text-align:center;
+  transform:translate(-50%,-50%);
 }
 
 .playerBody{
-    width:48px;
-    height:55px;
-    margin:3px auto;
-    border-radius:13px 13px 5px 5px;
-    background:#2979ff;
+  width:35px;
+  height:45px;
+  margin:auto;
+  border-radius:12px 12px 8px 8px;
+  border:2px solid rgba(255,255,255,.7);
 }
 
-.playerLegs{
-    display:flex;
-    justify-content:center;
-    gap:7px;
+.playerHead{
+  width:27px;
+  height:27px;
+  background:#ffd2a6;
+  border-radius:50%;
+  margin:auto;
+  margin-bottom:-3px;
+  border:2px solid #222;
 }
 
-.playerLegs span{
-    width:13px;
-    height:30px;
-    background:#222;
-    border-radius:8px;
+.playerName{
+  white-space:nowrap;
+  font-size:12px;
+  font-weight:bold;
+  text-shadow:0 2px 4px #000;
 }
 
-.rodVisual{
-    position:absolute;
-    width:125px;
-    height:6px;
-    background:#342315;
-    transform:rotate(-20deg);
-    transform-origin:left center;
-    left:46px;
-    top:43px;
+#sidePanel{
+  position:absolute;
+  right:12px;
+  top:70px;
+  width:270px;
+  max-height:calc(100vh - 85px);
+  overflow:auto;
+  z-index:30;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
 }
 
-.lineVisual{
-    position:absolute;
-    width:2px;
-    height:110px;
-    background:white;
-    left:165px;
-    top:15px;
+.panel{
+  background:rgba(0,22,40,.9);
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:15px;
+  padding:12px;
 }
 
-/* ================================
-   다른 플레이어
-================================ */
-
-.publicPlayers{
-    position:absolute;
-    inset:0;
-    pointer-events:none;
-    z-index:25;
+.panel h3{
+  margin:0 0 9px;
 }
 
-.onlinePlayer{
-    position:absolute;
-    width:65px;
-    height:120px;
-    transform:translateX(-50%);
-    text-align:center;
+.panel button{
+  width:100%;
+  margin-top:5px;
 }
 
-.onlineName{
-    display:inline-block;
-    background:rgba(0,0,0,.65);
-    padding:3px 7px;
-    border-radius:7px;
-    font-size:12px;
-    white-space:nowrap;
-    margin-bottom:3px;
+#inventoryList{
+  max-height:180px;
+  overflow:auto;
 }
 
-.onlineBody{
-    width:60px;
-    height:85px;
-    margin:auto;
+.fishItem{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  padding:7px 4px;
+  border-bottom:1px solid rgba(255,255,255,.1);
+  font-size:13px;
 }
 
-.onlineHead{
-    width:30px;
-    height:30px;
-    margin:auto;
-    border-radius:50%;
-    background:#ffd2a6;
+.rarity-basic{color:#fff}
+.rarity-rare{color:#55c8ff}
+.rarity-uncommon{color:#8cff8c}
+.rarity-legendary{color:#ffd34d}
+.rarity-mystic{color:#e889ff}
+.rarity-primal{color:#ff7272}
+
+#shopModal,
+#codexModal,
+#saveModal,
+#loadModal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.75);
+  z-index:200;
+  align-items:center;
+  justify-content:center;
+  padding:15px;
 }
-
-.onlineShirt{
-    width:40px;
-    height:45px;
-    margin:2px auto;
-    border-radius:10px;
-}
-
-/* ================================
-   UI
-================================ */
-
-.topUI{
-    position:absolute;
-    z-index:50;
-    top:12px;
-    left:12px;
-    right:12px;
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    gap:10px;
-    pointer-events:none;
-}
-
-.topLeft,
-.topRight{
-    display:flex;
-    gap:7px;
-    flex-wrap:wrap;
-    pointer-events:auto;
-}
-
-.uiBox{
-    background:rgba(0,0,0,.58);
-    padding:10px 13px;
-    border-radius:12px;
-    font-weight:bold;
-    backdrop-filter:blur(5px);
-}
-
-.uiBtn{
-    padding:10px 13px;
-    border-radius:11px;
-    color:white;
-    background:rgba(0,0,0,.62);
-    font-weight:bold;
-}
-
-.uiBtn:hover{
-    background:rgba(0,0,0,.85);
-}
-
-.publicNotice{
-    position:absolute;
-    z-index:45;
-    top:95px;
-    left:50%;
-    transform:translateX(-50%);
-    padding:8px 15px;
-    border-radius:20px;
-    background:rgba(0,0,0,.52);
-    font-size:13px;
-    text-align:center;
-}
-
-/* ================================
-   낚시
-================================ */
-
-.fishingPanel{
-    position:absolute;
-    z-index:60;
-    left:50%;
-    transform:translateX(-50%);
-    bottom:25px;
-    width:min(92vw,650px);
-    text-align:center;
-}
-
-.fishingMessage{
-    min-height:50px;
-    font-size:clamp(18px,4vw,27px);
-    font-weight:900;
-    text-shadow:0 2px 4px #000;
-    margin-bottom:10px;
-}
-
-.fishingBtn{
-    padding:15px 35px;
-    border-radius:15px;
-    font-size:21px;
-    font-weight:900;
-    background:#ffbd2e;
-    color:#222;
-    box-shadow:0 5px 15px rgba(0,0,0,.3);
-}
-
-.fishingBtn:active{
-    transform:scale(.96);
-}
-
-.gaugeWrap{
-    display:none;
-    width:100%;
-    height:38px;
-    background:#202020;
-    border:3px solid white;
-    border-radius:20px;
-    overflow:hidden;
-    margin-bottom:12px;
-}
-
-.gauge{
-    width:0%;
-    height:100%;
-    background:linear-gradient(90deg,#00e676,#ffff00,#ff3d00);
-}
-
-/* ================================
-   팝업
-================================ */
-
-.catchPopup{
-    position:absolute;
-    z-index:200;
-    left:50%;
-    top:45%;
-    transform:translate(-50%,-50%) scale(.5);
-    opacity:0;
-    pointer-events:none;
-    text-align:center;
-    transition:.3s;
-}
-
-.catchPopup.show{
-    transform:translate(-50%,-50%) scale(1);
-    opacity:1;
-}
-
-.catchBig{
-    font-size:80px;
-}
-
-.catchTitle{
-    font-size:34px;
-    font-weight:900;
-    text-shadow:0 4px 10px #000;
-}
-
-.catchSub{
-    font-size:19px;
-    margin-top:8px;
-}
-
-/* ================================
-   모달
-================================ */
 
 .modal{
-    position:absolute;
-    inset:0;
-    z-index:100;
-    display:none;
-    align-items:center;
-    justify-content:center;
-    background:rgba(0,0,0,.72);
-    padding:15px;
+  width:min(95%,700px);
+  max-height:90vh;
+  overflow:auto;
+  background:#092b40;
+  border-radius:20px;
+  padding:20px;
 }
 
-.modal.show{
-    display:flex;
+.modal h2{
+  margin-top:0;
 }
 
-.modalBox{
-    width:min(95vw,1000px);
-    max-height:92vh;
-    overflow:auto;
-    background:#102131;
-    border:2px solid #40647e;
-    border-radius:20px;
-    padding:20px;
-}
-
-.modalHeader{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:10px;
-    margin-bottom:15px;
-}
-
-.modalHeader h2{
-    margin:0;
-}
-
-.closeBtn{
-    padding:10px 14px;
-    background:#e74c3c;
-    color:white;
-    border-radius:10px;
-    font-weight:bold;
-}
-
-/* ================================
-   도감
-================================ */
-
-.tabs{
-    display:flex;
-    gap:7px;
-    overflow:auto;
-    margin-bottom:15px;
-}
-
-.tab{
-    flex:0 0 auto;
-    padding:10px 14px;
-    border-radius:10px;
-    background:#233d50;
-    color:white;
-}
-
-.tab.active{
-    background:#267cff;
-}
-
-.codexGrid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(145px,1fr));
-    gap:9px;
-}
-
-.codexCard{
-    min-height:145px;
-    border-radius:13px;
-    background:#1c3344;
-    padding:10px;
-    text-align:center;
-    border:1px solid #31556d;
-}
-
-.codexCard.unknown{
-    background:#10171d;
-}
-
-.fishEmoji{
-    font-size:38px;
-    margin:5px;
-}
-
-.fishName{
-    font-weight:900;
-    margin-bottom:4px;
-}
-
-.fishRarity{
-    font-size:12px;
-}
-
-.fishTrait{
-    font-size:13px;
-    margin-top:4px;
-}
-
-.fishPrice{
-    color:#ffd54f;
-    font-size:12px;
-    margin-top:5px;
-}
-
-/* ================================
-   인벤토리 / 판매
-================================ */
-
-.inventoryGrid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
-    gap:10px;
-}
-
-.inventoryCard{
-    background:#1a3344;
-    padding:12px;
-    border-radius:13px;
-}
-
-.sellBtn{
-    margin-top:8px;
-    width:100%;
-    padding:9px;
-    border-radius:9px;
-    background:#e6a928;
-    font-weight:bold;
-}
-
-/* ================================
-   상점
-================================ */
-
-.rodList{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(210px,1fr));
-    gap:10px;
+.modalGrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:10px;
 }
 
 .rodCard{
-    background:#1a3344;
-    border-radius:13px;
-    padding:15px;
+  background:rgba(255,255,255,.08);
+  border-radius:14px;
+  padding:12px;
 }
 
-.rodCard.current{
-    border:2px solid #00e676;
+.rodCard strong{
+  display:block;
+  font-size:18px;
+  margin-bottom:5px;
 }
 
-.buyRod{
-    width:100%;
-    margin-top:10px;
-    padding:10px;
-    background:#20b56b;
-    color:white;
-    border-radius:9px;
-    font-weight:bold;
+.codexGrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:6px;
 }
 
-/* ================================
-   저장
-================================ */
-
-.saveInput{
-    width:100%;
-    padding:14px;
-    border-radius:10px;
-    border:0;
-    margin-bottom:10px;
-    font-size:17px;
+.codexItem{
+  padding:9px;
+  border-radius:8px;
+  background:rgba(255,255,255,.06);
+  font-size:12px;
 }
 
-.saveAction{
-    width:100%;
-    padding:13px;
-    border-radius:10px;
-    background:#267cff;
-    color:white;
-    font-weight:bold;
-    margin-bottom:15px;
+.codexItem.found{
+  background:rgba(0,200,120,.22);
 }
 
-.saveItem{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:8px;
-    background:#1b3447;
-    padding:10px;
-    border-radius:10px;
-    margin-bottom:8px;
+.modalClose{
+  margin-top:15px;
+  background:#555;
 }
 
-.saveButtons{
-    display:flex;
-    gap:5px;
+.saveRow{
+  display:flex;
+  gap:7px;
+  margin:7px 0;
 }
 
-.saveButtons button{
+.saveRow input{
+  flex:1;
+  padding:10px;
+  border:0;
+  border-radius:8px;
+}
+
+.saveRow button{
+  padding:9px 12px;
+}
+
+#mobileControls{
+  display:none;
+  position:absolute;
+  left:12px;
+  bottom:15px;
+  z-index:50;
+}
+
+#mobileControls button{
+  width:60px;
+  height:55px;
+  margin-right:5px;
+  background:rgba(0,0,0,.45);
+}
+
+#toast{
+  position:fixed;
+  left:50%;
+  bottom:25px;
+  transform:translateX(-50%);
+  background:rgba(0,0,0,.85);
+  padding:12px 20px;
+  border-radius:12px;
+  z-index:500;
+  display:none;
+  text-align:center;
+  max-width:90%;
+}
+
+@media(max-width:800px){
+  #sidePanel{
+    width:190px;
+    top:70px;
+    max-height:45vh;
+  }
+
+  .panel{
     padding:8px;
-    border-radius:8px;
-    color:white;
-    font-weight:bold;
+  }
+
+  .panel h3{
+    font-size:15px;
+  }
+
+  .panel button{
+    font-size:13px;
+    padding:8px;
+  }
+
+  #mobileControls{
+    display:block;
+  }
+
+  #fishingArea{
+    top:55%;
+  }
+
+  #hook{
+    font-size:50px;
+  }
+
+  #fishMessage{
+    font-size:16px;
+  }
+
+  #fishingButton{
+    min-height:60px;
+    font-size:21px;
+  }
+
+  .stat{
+    font-size:12px;
+    padding:6px 8px;
+  }
+
+  #serverStatus{
+    margin-left:0;
+  }
 }
 
-.loadBtn{
-    background:#2980ff;
-}
+@media(max-width:500px){
+  #sidePanel{
+    width:155px;
+  }
 
-.deleteBtn{
-    background:#e74c3c;
-}
+  .codexGrid{
+    grid-template-columns:repeat(2,1fr);
+  }
 
-/* ================================
-   모바일
-================================ */
-
-@media(max-width:700px){
-
-    .dock{
-        width:48%;
-        min-width:170px;
-    }
-
-    .player{
-        left:23%;
-        transform:scale(.8);
-        transform-origin:top left;
-    }
-
-    .topUI{
-        top:5px;
-        left:5px;
-        right:5px;
-    }
-
-    .uiBox,
-    .uiBtn{
-        padding:7px 9px;
-        font-size:12px;
-    }
-
-    .publicNotice{
-        top:82px;
-        width:92%;
-    }
-
-    .fishingPanel{
-        bottom:15px;
-    }
-
-    .fishingBtn{
-        width:100%;
-    }
-
-    .codexGrid{
-        grid-template-columns:repeat(2,1fr);
-    }
-
-    .inventoryGrid{
-        grid-template-columns:1fr;
-    }
+  .modeBox h1{
+    font-size:30px;
+  }
 }
 </style>
 </head>
 
 <body>
 
+<!-- 서버 선택 -->
+<div id="modeScreen">
+  <div class="modeBox">
+
+    <h1>🎣 낚시왕</h1>
+    <p>어떤 서버에서 낚시할까요?</p>
+
+    <div class="modeButtons">
+      <button class="privateBtn" onclick="selectPrivate()">
+        🔒 개인 서버
+      </button>
+
+      <button class="publicBtn" onclick="showNickname()">
+        🌐 공용 서버
+      </button>
+    </div>
+
+    <div id="nicknameBox">
+      <input id="nickname" maxlength="12" placeholder="닉네임을 입력하세요">
+      <br>
+      <button onclick="selectPublic()">공용 서버 입장</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- 게임 -->
 <div id="game">
 
-<!-- ================================
-     서버 선택
-================================ -->
+  <div id="topBar">
 
-<div id="serverScreen" class="screen active">
+    <div class="stat">
+      💰 <span id="money">0</span>G
+    </div>
 
-    <div class="serverBox">
+    <div class="stat">
+      🎣 <span id="rodName">나뭇가지 낚싯대</span>
+    </div>
 
-        <div class="serverTitle">
-            🎣 낚시 게임
-        </div>
+    <div class="stat">
+      📖 도감 <span id="codexCount">0</span>/400
+    </div>
 
-        <div class="serverSub">
-            서버를 선택하세요
-        </div>
+    <div id="serverStatus" class="offline">
+      연결 준비 중...
+    </div>
 
-        <div class="serverButtons">
+  </div>
 
-            <button
-                class="serverBtn privateBtn"
-                onclick="choosePrivate()"
-            >
-                🔒 개인 서버
-                <div style="font-size:14px;margin-top:8px;opacity:.8">
-                    혼자 플레이
-                </div>
-            </button>
+  <div id="sea">
 
-            <button
-                class="serverBtn publicBtn"
-                onclick="choosePublic()"
-            >
-                🌐 공용 서버
-                <div style="font-size:14px;margin-top:8px;opacity:.8">
-                    다른 사람들과 플레이
-                </div>
-            </button>
+    <div class="wave"></div>
+    <div class="wave"></div>
+    <div class="wave"></div>
 
-        </div>
+    <div id="playerLayer"></div>
 
-        <div class="serverInfo">
-            개인 서버와 공용 서버 모두 낚시 가능<br>
-            공용 서버에서는 다른 플레이어와 도감을 공유합니다.
-        </div>
+    <div id="fishingArea">
+
+      <div id="hook">🎣</div>
+
+      <div id="fishMessage">
+        낚싯대를 던져보세요!
+      </div>
+
+      <div id="gaugeWrap">
+        <div id="gauge"></div>
+      </div>
+
+      <button id="fishingButton" onclick="fishClick()">
+        🎣 낚시 시작
+      </button>
 
     </div>
+
+  </div>
+
+  <div id="sidePanel">
+
+    <div class="panel">
+      <h3>🐟 내 물고기</h3>
+      <div id="inventoryList">아직 없습니다.</div>
+      <button onclick="sellFish()">💰 전체 판매</button>
+    </div>
+
+    <div class="panel">
+      <h3>🛒 상점</h3>
+      <button onclick="openShop()">🎣 낚싯대 상점</button>
+      <button onclick="openCodex()">📖 도감</button>
+    </div>
+
+    <div class="panel" id="privateButtons">
+      <h3>💾 저장</h3>
+      <button onclick="saveAuto()">자동 저장</button>
+      <button onclick="openSaveModal()">저장하기</button>
+      <button onclick="openLoadModal()">불러오기</button>
+    </div>
+
+    <div class="panel">
+      <button onclick="leaveGame()">🚪 서버 나가기</button>
+    </div>
+
+  </div>
+
+  <div id="mobileControls">
+    <button onclick="movePlayer(-1)">◀</button>
+    <button onclick="movePlayer(1)">▶</button>
+  </div>
 
 </div>
 
+<!-- 상점 -->
+<div id="shopModal">
+  <div class="modal">
 
-<!-- ================================
-     닉네임
-================================ -->
+    <h2>🎣 낚싯대 상점</h2>
 
-<div id="nicknameScreen" class="screen">
+    <div id="rodList" class="modalGrid"></div>
 
-    <div class="nicknameBox">
+    <button class="modalClose" onclick="closeModal('shopModal')">
+      닫기
+    </button>
 
-        <h2>🌐 공용 서버</h2>
-
-        <p>
-            게임에서 사용할 닉네임을 입력하세요.
-        </p>
-
-        <input
-            id="nicknameInput"
-            class="nicknameInput"
-            maxlength="12"
-            placeholder="닉네임"
-        >
-
-        <button
-            class="startPublic"
-            onclick="startPublicServer()"
-        >
-            공용 서버 입장
-        </button>
-
-        <button
-            onclick="backToServerSelect()"
-            style="
-                margin-top:10px;
-                width:100%;
-                padding:12px;
-                border-radius:10px;
-            "
-        >
-            뒤로가기
-        </button>
-
-    </div>
-
+  </div>
 </div>
 
+<!-- 도감 -->
+<div id="codexModal">
+  <div class="modal">
 
-<!-- ================================
-     게임
-================================ -->
+    <h2>📖 물고기 도감</h2>
 
-<div id="gameScreen" class="screen">
+    <p id="codexDescription"></p>
 
-    <div class="cloud cloud1"></div>
-    <div class="cloud cloud2"></div>
-    <div class="cloud cloud3"></div>
+    <div id="codexList" class="codexGrid"></div>
 
-    <div class="water"></div>
+    <button class="modalClose" onclick="closeModal('codexModal')">
+      닫기
+    </button>
 
-    <div class="dock"></div>
-
-
-    <!-- 내 캐릭터 -->
-
-    <div id="myPlayer" class="player">
-
-        <div class="playerHead"></div>
-
-        <div
-            id="myPlayerBody"
-            class="playerBody"
-        ></div>
-
-        <div class="playerLegs">
-            <span></span>
-            <span></span>
-        </div>
-
-        <div class="rodVisual"></div>
-
-        <div class="lineVisual"></div>
-
-    </div>
-
-
-    <!-- 다른 플레이어 -->
-
-    <div
-        id="publicPlayers"
-        class="publicPlayers"
-    ></div>
-
-
-    <!-- 상단 UI -->
-
-    <div class="topUI">
-
-        <div class="topLeft">
-
-            <div class="uiBox">
-                💰
-                <span id="moneyText">0</span>G
-            </div>
-
-            <div class="uiBox">
-                🎣
-                <span id="rodText">
-                    나뭇가지 낚싯대
-                </span>
-            </div>
-
-            <button
-                class="uiBtn"
-                onclick="openCodex()"
-            >
-                📖 도감
-            </button>
-
-            <button
-                class="uiBtn"
-                onclick="openInventory()"
-            >
-                🎒 물고기
-            </button>
-
-        </div>
-
-
-        <div class="topRight">
-
-            <button
-                class="uiBtn"
-                onclick="openRodShop()"
-            >
-                🏪 낚싯대
-            </button>
-
-            <button
-                class="uiBtn"
-                onclick="openSell()"
-            >
-                💰 판매
-            </button>
-
-            <button
-                id="saveButton"
-                class="uiBtn"
-                onclick="openSaveModal()"
-            >
-                💾 저장
-            </button>
-
-            <button
-                id="loadButton"
-                class="uiBtn"
-                onclick="openLoadModal()"
-            >
-                📂 불러오기
-            </button>
-
-            <button
-                class="uiBtn"
-                onclick="backToServerSelect()"
-            >
-                🚪 나가기
-            </button>
-
-        </div>
-
-    </div>
-
-
-    <div
-        id="publicNotice"
-        class="publicNotice"
-        style="display:none"
-    >
-        🌐 공용 서버 · A/D 이동 · 클릭/Enter 낚시 · 도감 공유
-    </div>
-
-
-    <!-- 낚시 -->
-
-    <div class="fishingPanel">
-
-        <div
-            id="fishingMessage"
-            class="fishingMessage"
-        >
-            🎣 낚시를 시작하세요!
-        </div>
-
-        <div
-            id="gaugeWrap"
-            class="gaugeWrap"
-        >
-            <div
-                id="gauge"
-                class="gauge"
-            ></div>
-        </div>
-
-        <button
-            id="fishingButton"
-            class="fishingBtn"
-            onclick="fishingAction()"
-        >
-            🎣 낚시하기
-        </button>
-
-    </div>
-
-
-    <!-- 물고기 획득 -->
-
-    <div
-        id="catchPopup"
-        class="catchPopup"
-    >
-
-        <div
-            id="catchBig"
-            class="catchBig"
-        >
-            🐟
-        </div>
-
-        <div
-            id="catchTitle"
-            class="catchTitle"
-        >
-            물고기 획득!
-        </div>
-
-        <div
-            id="catchSub"
-            class="catchSub"
-        ></div>
-
-    </div>
-
+  </div>
 </div>
 
+<!-- 저장 -->
+<div id="saveModal">
+  <div class="modal">
 
-<!-- ================================
-     도감
-================================ -->
+    <h2>💾 저장</h2>
 
-<div id="codexModal" class="modal">
-
-    <div class="modalBox">
-
-        <div class="modalHeader">
-
-            <h2>
-                📖 물고기 도감
-            </h2>
-
-            <button
-                class="closeBtn"
-                onclick="closeModal('codexModal')"
-            >
-                닫기
-            </button>
-
-        </div>
-
-
-        <div class="tabs">
-
-            <button
-                class="tab active"
-                onclick="setCodexTab('all',this)"
-            >
-                📖 전체
-            </button>
-
-            <button
-                class="tab"
-                onclick="setCodexTab('normal',this)"
-            >
-                🐟 기본
-            </button>
-
-            <button
-                class="tab"
-                onclick="setCodexTab('different',this)"
-            >
-                🎨 색이 다른
-            </button>
-
-            <button
-                class="tab"
-                onclick="setCodexTab('shiny',this)"
-            >
-                ✨ 빛나는
-            </button>
-
-            <button
-                class="tab"
-                onclick="setCodexTab('rainbow',this)"
-            >
-                🌈 무지개
-            </button>
-
-        </div>
-
-
-        <div id="codexCount"></div>
-
-        <br>
-
-        <div
-            id="codexGrid"
-            class="codexGrid"
-        ></div>
-
+    <div class="saveRow">
+      <input id="saveName" placeholder="저장 이름">
+      <button onclick="saveNamed()">저장</button>
     </div>
 
+    <div id="saveList"></div>
+
+    <button class="modalClose" onclick="closeModal('saveModal')">
+      닫기
+    </button>
+
+  </div>
 </div>
 
+<!-- 불러오기 -->
+<div id="loadModal">
+  <div class="modal">
 
-<!-- ================================
-     인벤토리
-================================ -->
+    <h2>📂 불러오기</h2>
 
-<div id="inventoryModal" class="modal">
+    <div id="loadList"></div>
 
-    <div class="modalBox">
+    <button class="modalClose" onclick="closeModal('loadModal')">
+      닫기
+    </button>
 
-        <div class="modalHeader">
-
-            <h2>
-                🎒 물고기
-            </h2>
-
-            <button
-                class="closeBtn"
-                onclick="closeModal('inventoryModal')"
-            >
-                닫기
-            </button>
-
-        </div>
-
-        <div
-            id="inventoryGrid"
-            class="inventoryGrid"
-        ></div>
-
-    </div>
-
+  </div>
 </div>
 
-
-<!-- ================================
-     낚싯대 상점
-================================ -->
-
-<div id="rodModal" class="modal">
-
-    <div class="modalBox">
-
-        <div class="modalHeader">
-
-            <h2>
-                🏪 낚싯대 상점
-            </h2>
-
-            <button
-                class="closeBtn"
-                onclick="closeModal('rodModal')"
-            >
-                닫기
-            </button>
-
-        </div>
-
-        <div
-            id="rodList"
-            class="rodList"
-        ></div>
-
-    </div>
-
-</div>
-
-
-<!-- ================================
-     판매
-================================ -->
-
-<div id="sellModal" class="modal">
-
-    <div class="modalBox">
-
-        <div class="modalHeader">
-
-            <h2>
-                💰 물고기 판매
-            </h2>
-
-            <button
-                class="closeBtn"
-                onclick="closeModal('sellModal')"
-            >
-                닫기
-            </button>
-
-        </div>
-
-        <div
-            id="sellGrid"
-            class="inventoryGrid"
-        ></div>
-
-    </div>
-
-</div>
-
-
-<!-- ================================
-     저장
-================================ -->
-
-<div id="saveModal" class="modal">
-
-    <div class="modalBox">
-
-        <div class="modalHeader">
-
-            <h2>
-                💾 저장
-            </h2>
-
-            <button
-                class="closeBtn"
-                onclick="closeModal('saveModal')"
-            >
-                닫기
-            </button>
-
-        </div>
-
-        <input
-            id="saveNameInput"
-            class="saveInput"
-            maxlength="20"
-            placeholder="저장 이름"
-        >
-
-        <button
-            class="saveAction"
-            onclick="saveNamedGame()"
-        >
-            💾 이 이름으로 저장
-        </button>
-
-        <div id="saveList"></div>
-
-    </div>
-
-</div>
-
-
-<!-- ================================
-     불러오기
-================================ -->
-
-<div id="loadModal" class="modal">
-
-    <div class="modalBox">
-
-        <div class="modalHeader">
-
-            <h2>
-                📂 불러오기
-            </h2>
-
-            <button
-                class="closeBtn"
-                onclick="closeModal('loadModal')"
-            >
-                닫기
-            </button>
-
-        </div>
-
-        <input
-            id="loadNameInput"
-            class="saveInput"
-            maxlength="20"
-            placeholder="저장 이름"
-        >
-
-        <button
-            class="saveAction"
-            onclick="loadNamedGame()"
-        >
-            📂 불러오기
-        </button>
-
-        <div id="loadList"></div>
-
-    </div>
-
-</div>
-
-</div>
-
+<div id="toast"></div>
 
 <script type="module">
 
-/* =====================================================
+/* =========================================================
    FIREBASE
-===================================================== */
+========================================================= */
 
 import {
-    initializeApp
+  initializeApp
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 
 import {
-    getAuth,
-    signInAnonymously
+  getAuth,
+  signInAnonymously,
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 
 import {
-    getDatabase,
-    ref,
-    set,
-    update,
-    remove,
-    onValue,
-    onDisconnect
+  getDatabase,
+  ref,
+  set,
+  update,
+  onValue,
+  onDisconnect,
+  remove
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js";
 
 
+/* =========================================================
+   네 Firebase 설정
+========================================================= */
+
 const firebaseConfig = {
-
-    apiKey:
-        "AIzaSyBjtnBoPD8NHXUzh4lLFdKMiZusWYvnd2Y",
-
-    authDomain:
-        "fishing-3d841.firebaseapp.com",
-
-    projectId:
-        "fishing-3d841",
-
-    storageBucket:
-        "fishing-3d841.firebasestorage.app",
-
-    messagingSenderId:
-        "842079619009",
-
-    appId:
-        "1:842079619009:web:e06bf2ad7d2541706ed140",
-
-    databaseURL:
-        "https://fishing-3d841-default-rtdb.firebaseio.com"
-
+  apiKey: "AIzaSyBjtnBoPD8NHXUzh4lLfdKMiZusWYvnd2Y",
+  authDomain: "fishing-3d841.firebaseapp.com",
+  projectId: "fishing-3d841",
+  storageBucket: "fishing-3d841.firebasestorage.app",
+  messagingSenderId: "842079619009",
+  appId: "1:842079619009:web:e06bf2ad7d2541706ed140"
 };
 
 
-const firebaseApp =
-    initializeApp(firebaseConfig);
+/* =========================================================
+   Firebase 초기화
+========================================================= */
 
-const auth =
-    getAuth(firebaseApp);
+let firebaseApp;
+let auth;
+let db;
+let currentUser = null;
 
-const db =
-    getDatabase(firebaseApp);
+try{
 
+  firebaseApp = initializeApp(firebaseConfig);
 
-/* =====================================================
-   상태
-===================================================== */
+  auth = getAuth(firebaseApp);
 
-let serverMode = null;
+  db = getDatabase(firebaseApp);
 
-let myUid = null;
+  onAuthStateChanged(auth,(user)=>{
 
-let myNickname = "";
+    currentUser = user;
 
-let myPlayerX = 18;
+    if(user){
+      setServerStatus("Firebase 로그인 완료","online");
+    }
 
-let myColor = randomColor();
+  });
 
-let fishingState = "idle";
+}catch(error){
 
-let fishingTimer = null;
+  console.error(error);
 
-let gaugeValue = 0;
+  setServerStatus(
+    "Firebase 초기화 실패",
+    "offline"
+  );
 
-let money = 0;
-
-let currentRod = 0;
-
-let inventory = {};
-
-let privateCodex = {};
-
-let publicCodex = {};
-
-let currentCodexTab = "all";
-
-let publicPlayers = {};
+}
 
 
-/* =====================================================
-   물고기 100종
-===================================================== */
+/* =========================================================
+   게임 데이터
+========================================================= */
 
 const fishNames = [
 
@@ -1496,2478 +791,1716 @@ const fishNames = [
 ];
 
 
-const rarityData = [
-
-{
+const rarities = [
+  {
     name:"기본",
-    color:"#bdbdbd",
-    value:20
-},
-
-{
+    class:"rarity-basic",
+    base:20
+  },
+  {
     name:"레어",
-    color:"#4fc3f7",
-    value:100
-},
-
-{
+    class:"rarity-rare",
+    base:100
+  },
+  {
     name:"희귀",
-    color:"#ba68c8",
-    value:500
-},
-
-{
+    class:"rarity-uncommon",
+    base:500
+  },
+  {
     name:"전설",
-    color:"#ff9800",
-    value:3000
-},
-
-{
+    class:"rarity-legendary",
+    base:3000
+  },
+  {
     name:"신비",
-    color:"#e91e63",
-    value:15000
-},
-
-{
+    class:"rarity-mystic",
+    base:15000
+  },
+  {
     name:"원시",
-    color:"#ff1744",
-    value:100000
-}
-
+    class:"rarity-primal",
+    base:100000
+  }
 ];
 
-
-const emojiList = [
-"🐟","🐠","🐡","🦈","🐙","🦑","🐋","🐬","🪼"
-];
-
-
-const fishList =
-fishNames.map((name,index)=>{
-
-    let rarity;
-
-    if(index < 18)
-        rarity = 0;
-    else if(index < 36)
-        rarity = 1;
-    else if(index < 54)
-        rarity = 2;
-    else if(index < 72)
-        rarity = 3;
-    else if(index < 91)
-        rarity = 4;
-    else
-        rarity = 5;
-
-
-    return {
-
-        id:index,
-
-        name:name,
-
-        rarity:rarity,
-
-        emoji:
-            emojiList[index % emojiList.length],
-
-        price:
-            Math.floor(
-                rarityData[rarity].value *
-                (1 + index*.02)
-            )
-
-    };
-
-});
-
-
-/* =====================================================
-   특성
-===================================================== */
 
 const traits = {
 
-normal:{
+  normal:{
     name:"기본",
     emoji:"🐟",
     multiplier:1
-},
+  },
 
-different:{
+  different:{
     name:"색이 다른",
     emoji:"🎨",
     multiplier:2
-},
+  },
 
-shiny:{
+  shiny:{
     name:"빛나는",
     emoji:"✨",
     multiplier:8
-},
+  },
 
-rainbow:{
+  rainbow:{
     name:"무지개",
     emoji:"🌈",
     multiplier:30
-}
+  }
 
 };
 
 
-const traitOrder = [
-"normal",
-"different",
-"shiny",
-"rainbow"
-];
-
-
-/* =====================================================
+/* =========================================================
    낚싯대
-===================================================== */
+========================================================= */
 
 const rods = [
 
-{
-name:"나뭇가지 낚싯대",
-price:0,
-luck:0,
-power:1,
-speed:1
-},
+ {
+  name:"나뭇가지 낚싯대",
+  price:0,
+  luck:0,
+  power:1,
+  speed:1
+ },
 
-{
-name:"초보 낚싯대",
-price:100,
-luck:3,
-power:1.05,
-speed:1.02
-},
+ {
+  name:"초보 낚싯대",
+  price:100,
+  luck:3,
+  power:1.05,
+  speed:1.02
+ },
 
-{
-name:"튼튼한 낚싯대",
-price:300,
-luck:7,
-power:1.1,
-speed:1.05
-},
+ {
+  name:"튼튼한 낚싯대",
+  price:300,
+  luck:7,
+  power:1.1,
+  speed:1.05
+ },
 
-{
-name:"구리 낚싯대",
-price:600,
-luck:11,
-power:1.15,
-speed:1.08
-},
+ {
+  name:"구리 낚싯대",
+  price:600,
+  luck:11,
+  power:1.15,
+  speed:1.08
+ },
 
-{
-name:"철 낚싯대",
-price:1000,
-luck:16,
-power:1.2,
-speed:1.1
-},
+ {
+  name:"철 낚싯대",
+  price:1000,
+  luck:16,
+  power:1.2,
+  speed:1.1
+ },
 
-{
-name:"강철 낚싯대",
-price:1800,
-luck:22,
-power:1.3,
-speed:1.13
-},
+ {
+  name:"강철 낚싯대",
+  price:1800,
+  luck:22,
+  power:1.3,
+  speed:1.13
+ },
 
-{
-name:"은빛 낚싯대",
-price:3000,
-luck:30,
-power:1.4,
-speed:1.16
-},
+ {
+  name:"은빛 낚싯대",
+  price:3000,
+  luck:30,
+  power:1.4,
+  speed:1.16
+ },
 
-{
-name:"금빛 낚싯대",
-price:5000,
-luck:40,
-power:1.5,
-speed:1.2
-},
+ {
+  name:"금빛 낚싯대",
+  price:5000,
+  luck:40,
+  power:1.5,
+  speed:1.2
+ },
 
-{
-name:"황금 낚싯대",
-price:8000,
-luck:50,
-power:1.65,
-speed:1.25
-},
+ {
+  name:"황금 낚싯대",
+  price:8000,
+  luck:50,
+  power:1.65,
+  speed:1.25
+ },
 
-{
-name:"다이아 낚싯대",
-price:13000,
-luck:62,
-power:1.8,
-speed:1.3
-},
+ {
+  name:"다이아 낚싯대",
+  price:13000,
+  luck:62,
+  power:1.8,
+  speed:1.3
+ },
 
-{
-name:"전설 낚싯대",
-price:20000,
-luck:75,
-power:2,
-speed:1.35
-},
+ {
+  name:"전설 낚싯대",
+  price:20000,
+  luck:75,
+  power:2,
+  speed:1.35
+ },
 
-{
-name:"신비 낚싯대",
-price:35000,
-luck:90,
-power:2.2,
-speed:1.4
-},
+ {
+  name:"신비 낚싯대",
+  price:35000,
+  luck:90,
+  power:2.2,
+  speed:1.4
+ },
 
-{
-name:"우주 낚싯대",
-price:60000,
-luck:110,
-power:2.45,
-speed:1.5
-},
+ {
+  name:"우주 낚싯대",
+  price:60000,
+  luck:110,
+  power:2.45,
+  speed:1.5
+ },
 
-{
-name:"태초 낚싯대",
-price:100000,
-luck:140,
-power:2.8,
-speed:1.6
-},
+ {
+  name:"태초 낚싯대",
+  price:100000,
+  luck:140,
+  power:2.8,
+  speed:1.6
+ },
 
-{
-name:"창조신의 낚싯대",
-price:250000,
-luck:200,
-power:3.2,
-speed:1.8
-}
+ {
+  name:"창조신의 낚싯대",
+  price:250000,
+  luck:200,
+  power:3.2,
+  speed:1.8
+ }
 
 ];
 
 
-/* =====================================================
-   유틸
-===================================================== */
+/* =========================================================
+   상태
+========================================================= */
 
-function randomColor(){
+let serverMode = null;
 
-    const colors = [
-        "#ff5252",
-        "#ff9800",
-        "#ffee58",
-        "#69f0ae",
-        "#40c4ff",
-        "#7c4dff",
-        "#ff4081",
-        "#00e5ff",
-        "#76ff03",
-        "#d500f9"
-    ];
+let money = 0;
 
-    return colors[
-        Math.floor(Math.random()*colors.length)
-    ];
+let currentRod = 0;
+
+let inventory = {};
+
+let privateCodex = {};
+
+let publicCodex = {};
+
+let fishing = false;
+
+let gauge = 0;
+
+let myPlayerX = 50;
+
+let playerRef = null;
+
+let playersRef = null;
+
+let codexRef = null;
+
+let otherPlayers = {};
+
+let nickname = "";
+
+let myColor = "#";
+
+let saveSlots = JSON.parse(
+  localStorage.getItem("fishing_save_slots") || "{}"
+);
+
+const autoSaveKey = "fishing_auto_save";
+
+
+/* =========================================================
+   색상
+========================================================= */
+
+const colors = [
+ "#ff5757",
+ "#ff9f43",
+ "#ffe066",
+ "#65e572",
+ "#48dbfb",
+ "#54a0ff",
+ "#a66cff",
+ "#ff6bcb"
+];
+
+
+/* =========================================================
+   공통 함수
+========================================================= */
+
+function $(id){
+  return document.getElementById(id);
+}
+
+window.$ = $;
+
+
+function toast(message){
+
+  const el = $("toast");
+
+  el.textContent = message;
+
+  el.style.display = "block";
+
+  clearTimeout(window.toastTimer);
+
+  window.toastTimer = setTimeout(()=>{
+    el.style.display = "none";
+  },2500);
 
 }
 
 
-function escapeHTML(text){
+function setServerStatus(text,type){
 
-    return String(text)
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
+  const el = $("serverStatus");
 
+  el.textContent = text;
+
+  el.className = type || "";
 }
 
 
-/* =====================================================
-   화면
-===================================================== */
-
-function showScreen(id){
-
-    document
-    .querySelectorAll(".screen")
-    .forEach(
-        x=>x.classList.remove("active")
-    );
-
-    document
-    .getElementById(id)
-    .classList.add("active");
-
-}
-
-
-window.backToServerSelect = async function(){
-
-    if(myUid){
-
-        try{
-
-            await remove(
-                ref(
-                    db,
-                    "publicServer/players/" + myUid
-                )
-            );
-
-        }catch(e){}
-
-    }
-
-    serverMode = null;
-
-    myUid = null;
-
-    fishingState = "idle";
-
-    clearTimeout(fishingTimer);
-
-    showScreen("serverScreen");
-
-};
-
-
-/* =====================================================
+/* =========================================================
    서버 선택
-===================================================== */
+========================================================= */
 
-window.choosePrivate = function(){
+window.selectPrivate = function(){
 
-    serverMode = "private";
+  serverMode = "private";
 
-    document
-    .getElementById("publicNotice")
-    .style.display = "none";
+  loadAuto();
 
-    loadAutoSave();
-
-    showScreen("gameScreen");
-
-    updateUI();
+  startGame();
 
 };
 
 
-window.choosePublic = function(){
+window.showNickname = function(){
 
-    showScreen("nicknameScreen");
+  $("nicknameBox").style.display = "block";
+
+  $("nickname").focus();
 
 };
 
 
-/* =====================================================
-   공용 서버 입장
-===================================================== */
+window.selectPublic = async function(){
 
-window.startPublicServer = async function(){
+  nickname = $("nickname").value.trim();
 
-    const input =
-        document.getElementById("nicknameInput");
+  if(!nickname){
+    toast("닉네임을 입력하세요.");
+    return;
+  }
 
-    const nickname =
-        input.value.trim();
+  if(!auth){
+    toast("Firebase 초기화에 실패했습니다.");
+    return;
+  }
 
-    if(!nickname){
+  serverMode = "public";
 
-        alert("닉네임을 입력해주세요.");
+  $("nicknameBox").style.display = "none";
 
-        return;
+  setServerStatus(
+    "Firebase 로그인 중...",
+    "offline"
+  );
+
+  try{
+
+    /*
+      이미 로그인되어 있으면 다시 로그인하지 않음
+    */
+
+    if(!currentUser){
+
+      await signInAnonymously(auth);
 
     }
 
+    if(!currentUser){
 
-    myNickname =
-        nickname.slice(0,12);
-
-
-    try{
-
-        if(!auth.currentUser){
-
-            await signInAnonymously(auth);
-
-        }
-
-
-        myUid =
-            auth.currentUser.uid;
-
-
-        serverMode = "public";
-
-
-        /*
-         * 공용 서버에서도
-         * 각자 자기 돈/인벤토리/낚싯대를 사용
-         */
-
-        money = 0;
-
-        currentRod = 0;
-
-        inventory = {};
-
-        privateCodex = {};
-
-
-        document
-        .getElementById("publicNotice")
-        .style.display = "block";
-
-
-        showScreen("gameScreen");
-
-
-        setupPublicPlayer();
-
-        listenPublicPlayers();
-
-        listenPublicCodex();
-
-        updateUI();
-
-
-    }catch(error){
-
-        console.error(error);
-
-        alert(
-            "공용 서버 연결 실패\n\n"+
-            error.code+
-            "\n"+
-            error.message
-        );
+      throw new Error(
+        "익명 로그인 사용자를 가져오지 못했습니다."
+      );
 
     }
 
-};
+    startPublicServer();
 
+  }catch(error){
 
-/* =====================================================
-   공용 플레이어
-===================================================== */
+    console.error("PUBLIC LOGIN ERROR:",error);
 
-async function setupPublicPlayer(){
+    let message = error.code || error.message;
 
-    const playerRef =
-        ref(
-            db,
-            "publicServer/players/" +
-            myUid
-        );
+    if(error.code === "auth/api-key-not-valid"){
+      message =
+        "API 키가 Firebase 프로젝트와 일치하지 않습니다.";
+    }
 
+    if(error.code === "auth/operation-not-allowed"){
+      message =
+        "Firebase에서 익명 로그인을 켜주세요.";
+    }
 
-    await set(
-        playerRef,
-        {
-            nickname:myNickname,
-            x:myPlayerX,
-            color:myColor,
-            online:true
-        }
+    if(error.code === "auth/unauthorized-domain"){
+      message =
+        "Firebase Authentication에 현재 사이트 주소를 추가하세요.";
+    }
+
+    toast("공용 서버 연결 실패\n" + message);
+
+    setServerStatus(
+      "연결 실패",
+      "offline"
     );
 
+  }
 
-    onDisconnect(playerRef).remove();
+};
 
-    updateMyPlayerVisual();
+
+/* =========================================================
+   게임 시작
+========================================================= */
+
+function startGame(){
+
+  $("modeScreen").style.display = "none";
+
+  $("game").style.display = "block";
+
+  $("privateButtons").style.display =
+    serverMode === "private"
+      ? "block"
+      : "none";
+
+  updateUI();
+
+  if(serverMode === "private"){
+
+    setServerStatus(
+      "🔒 개인 서버",
+      "online"
+    );
+
+  }
 
 }
 
 
-function listenPublicPlayers(){
+/* =========================================================
+   공용 서버 시작
+========================================================= */
 
-    const playersRef =
-        ref(
-            db,
-            "publicServer/players"
-        );
+async function startPublicServer(){
 
+  startGame();
 
-    onValue(
-        playersRef,
-        snapshot=>{
+  setServerStatus(
+    "🌐 공용 서버 연결 중...",
+    "offline"
+  );
 
-            publicPlayers =
-                snapshot.val() || {};
+  /*
+    공용 서버에서도 돈/물고기/낚싯대는
+    각자의 게임 데이터로 시작한다.
+  */
 
-            renderPublicPlayers();
+  money = 0;
 
-        }
-    );
+  currentRod = 0;
 
-}
+  inventory = {};
 
+  privateCodex = {};
 
-function renderPublicPlayers(){
+  myPlayerX = 50;
 
-    const box =
-        document.getElementById(
-            "publicPlayers"
-        );
+  myColor =
+    colors[
+      Math.floor(Math.random()*colors.length)
+    ];
 
+  updateUI();
 
-    box.innerHTML = "";
+  try{
 
+    const uid = currentUser.uid;
 
-    Object.entries(publicPlayers)
-    .forEach(([uid,p])=>{
+    playerRef =
+      ref(
+        db,
+        "publicServer/players/" + uid
+      );
 
-        if(uid === myUid)
-            return;
+    playersRef =
+      ref(
+        db,
+        "publicServer/players"
+      );
 
-
-        const player =
-            document.createElement("div");
-
-
-        player.className =
-            "onlinePlayer";
-
-
-        player.style.left =
-            (p.x || 18) + "%";
-
-
-        player.style.top =
-            "54%";
-
-
-        player.innerHTML = `
-
-            <div class="onlineName">
-                ${escapeHTML(
-                    p.nickname || "플레이어"
-                )}
-            </div>
-
-            <div class="onlineBody">
-
-                <div class="onlineHead"></div>
-
-                <div
-                    class="onlineShirt"
-                    style="background:${
-                        p.color || "#4caf50"
-                    }"
-                ></div>
-
-            </div>
-
-        `;
+    codexRef =
+      ref(
+        db,
+        "publicServer/codex"
+      );
 
 
-        box.appendChild(player);
+    /*
+      내 플레이어 등록
+    */
+
+    await set(playerRef,{
+      nickname:nickname,
+      x:myPlayerX,
+      color:myColor,
+      online:true
+    });
+
+
+    /*
+      접속 종료하면 자동 삭제
+    */
+
+    await onDisconnect(playerRef).remove();
+
+
+    /*
+      다른 플레이어 실시간 감시
+    */
+
+    onValue(playersRef,(snapshot)=>{
+
+      otherPlayers =
+        snapshot.val() || {};
+
+      renderPlayers();
 
     });
 
-}
+
+    /*
+      공용 도감 실시간 감시
+    */
+
+    onValue(codexRef,(snapshot)=>{
+
+      publicCodex =
+        snapshot.val() || {};
+
+      updateUI();
+
+    });
 
 
-function updateMyPlayerVisual(){
+    setServerStatus(
+      "🟢 공용 서버 연결됨",
+      "online"
+    );
 
-    const player =
-        document.getElementById(
-            "myPlayer"
-        );
+    toast("공용 서버에 연결되었습니다!");
 
+  }catch(error){
 
-    player.style.left =
-        myPlayerX + "%";
+    console.error("PUBLIC SERVER ERROR:",error);
 
-}
-
-
-async function syncMyPosition(){
-
-    if(
-        serverMode !== "public" ||
-        !myUid
-    )
-        return;
-
-
-    try{
-
-        await update(
-            ref(
-                db,
-                "publicServer/players/" +
-                myUid
-            ),
-            {
-                x:myPlayerX
-            }
-        );
-
-    }catch(error){
-
-        console.error(error);
-
-    }
-
-}
-
-
-/* =====================================================
-   A / D
-===================================================== */
-
-document.addEventListener(
-"keydown",
-event=>{
-
-    if(serverMode !== "public")
-        return;
-
+    let msg = error.code || error.message;
 
     if(
-        event.key.toLowerCase() === "a"
+      String(msg).includes("PERMISSION_DENIED")
     ){
+      msg =
+        "Realtime Database 규칙을 확인하세요.";
+    }
 
-        myPlayerX -= 2;
+    toast("공용 서버 연결 실패\n" + msg);
 
-        if(myPlayerX < 5)
-            myPlayerX = 5;
+    setServerStatus(
+      "🔴 연결 실패",
+      "offline"
+    );
+
+  }
+
+}
 
 
-        updateMyPlayerVisual();
+/* =========================================================
+   플레이어 이동
+========================================================= */
 
-        syncMyPosition();
+window.movePlayer = function(direction){
+
+  if(serverMode !== "public"){
+    return;
+  }
+
+  myPlayerX += direction * 3;
+
+  myPlayerX =
+    Math.max(
+      5,
+      Math.min(95,myPlayerX)
+    );
+
+  updateMyPosition();
+
+};
+
+
+async function updateMyPosition(){
+
+  if(!playerRef){
+    return;
+  }
+
+  try{
+
+    await update(playerRef,{
+      x:myPlayerX
+    });
+
+  }catch(error){
+
+    console.error(error);
+
+  }
+
+}
+
+
+function renderPlayers(){
+
+  const layer = $("playerLayer");
+
+  layer.innerHTML = "";
+
+  Object.entries(otherPlayers).forEach(
+    ([uid,p])=>{
+
+      if(!p){
+        return;
+      }
+
+      const el =
+        document.createElement("div");
+
+      el.className = "player";
+
+      el.style.left =
+        (p.x || 50) + "%";
+
+      el.style.top =
+        "68%";
+
+      const head =
+        document.createElement("div");
+
+      head.className = "playerHead";
+
+      const body =
+        document.createElement("div");
+
+      body.className = "playerBody";
+
+      body.style.background =
+        p.color || "#fff";
+
+      const name =
+        document.createElement("div");
+
+      name.className = "playerName";
+
+      name.textContent =
+        p.nickname || "플레이어";
+
+      el.appendChild(head);
+      el.appendChild(body);
+      el.appendChild(name);
+
+      layer.appendChild(el);
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   물고기 정보
+========================================================= */
+
+function getRarity(index){
+
+  if(index < 18) return rarities[0];
+
+  if(index < 36) return rarities[1];
+
+  if(index < 54) return rarities[2];
+
+  if(index < 72) return rarities[3];
+
+  if(index < 91) return rarities[4];
+
+  return rarities[5];
+
+}
+
+
+function getTrait(){
+
+  const r = Math.random()*100;
+
+  if(r < 0.1){
+    return "rainbow";
+  }
+
+  if(r < 1){
+    return "shiny";
+  }
+
+  if(r < 6){
+    return "different";
+  }
+
+  return "normal";
+
+}
+
+
+function chooseFish(){
+
+  const rod = rods[currentRod];
+
+  const luck = rod.luck;
+
+  const weights = [
+    40,
+    15,
+    5*(1+luck/100),
+    1.5*(1+luck/70),
+    .3*(1+luck/55),
+    .03*(1+luck/40)
+  ];
+
+  const total =
+    weights.reduce(
+      (a,b)=>a+b,
+      0
+    );
+
+  let r =
+    Math.random()*total;
+
+  let rarityIndex = 0;
+
+  for(let i=0;i<weights.length;i++){
+
+    r -= weights[i];
+
+    if(r <= 0){
+
+      rarityIndex = i;
+
+      break;
 
     }
 
+  }
 
-    if(
-        event.key.toLowerCase() === "d"
-    ){
+  const start =
+    rarityIndex === 0 ? 0 :
+    rarityIndex === 1 ? 18 :
+    rarityIndex === 2 ? 36 :
+    rarityIndex === 3 ? 54 :
+    rarityIndex === 4 ? 72 :
+    91;
 
-        myPlayerX += 2;
+  const end =
+    rarityIndex === 0 ? 17 :
+    rarityIndex === 1 ? 35 :
+    rarityIndex === 2 ? 53 :
+    rarityIndex === 3 ? 71 :
+    rarityIndex === 4 ? 90 :
+    99;
 
-        if(myPlayerX > 45)
-            myPlayerX = 45;
+  const index =
+    start +
+    Math.floor(
+      Math.random() *
+      (end-start+1)
+    );
+
+  const trait =
+    getTrait();
+
+  return {
+    id:index,
+    name:fishNames[index],
+    rarity:getRarity(index),
+    trait:trait
+  };
+
+}
 
 
-        updateMyPlayerVisual();
-
-        syncMyPosition();
-
-    }
-
-});
-
-
-/* =====================================================
+/* =========================================================
    낚시
-===================================================== */
+========================================================= */
 
-window.fishingAction = function(){
+window.fishClick = function(){
 
-    if(fishingState === "idle"){
+  if(!fishing){
 
-        startFishing();
+    startFishing();
 
-        return;
+  }else{
 
-    }
+    increaseGauge();
 
-
-    if(fishingState === "waiting"){
-
-        return;
-
-    }
-
-
-    if(fishingState === "catching"){
-
-        increaseGauge();
-
-    }
+  }
 
 };
 
 
 function startFishing(){
 
-    if(fishingState !== "idle")
-        return;
+  fishing = true;
 
+  gauge = 0;
 
-    fishingState = "waiting";
+  $("gauge").style.width = "0%";
 
+  $("fishingButton").textContent =
+    "💥 계속 눌러서 낚기!";
 
-    document
-    .getElementById("fishingMessage")
-    .textContent =
-        "🎣 물고기를 기다리는 중...";
-
-
-    document
-    .getElementById("fishingButton")
-    .textContent =
-        "⏳ 기다리는 중";
-
-
-    const rod =
-        rods[currentRod];
-
-
-    const waitTime =
-        (1.3 + Math.random()*2.8)
-        / rod.speed;
-
-
-    fishingTimer =
-        setTimeout(
-            beginCatchGauge,
-            waitTime*1000
-        );
-
-}
-
-
-function beginCatchGauge(){
-
-    fishingState = "catching";
-
-    gaugeValue = 0;
-
-
-    document
-    .getElementById("gaugeWrap")
-    .style.display = "block";
-
-
-    document
-    .getElementById("gauge")
-    .style.width = "0%";
-
-
-    document
-    .getElementById("fishingMessage")
-    .textContent =
-        "⚡ 빠르게 클릭하거나 Enter를 누르세요!";
-
-
-    document
-    .getElementById("fishingButton")
-    .textContent =
-        "⚡ 낚아올리기!";
+  $("fishMessage").textContent =
+    "물고기가 미끼를 물었습니다!";
 
 }
 
 
 function increaseGauge(){
 
-    if(fishingState !== "catching")
-        return;
+  if(!fishing){
+    return;
+  }
 
+  const rod = rods[currentRod];
 
-    const rod =
-        rods[currentRod];
+  gauge += 8 * rod.power;
 
+  gauge =
+    Math.min(100,gauge);
 
-    gaugeValue +=
-        8 * rod.power;
+  $("gauge").style.width =
+    gauge + "%";
 
+  if(gauge >= 100){
 
-    if(gaugeValue > 100)
-        gaugeValue = 100;
+    catchFish();
 
-
-    document
-    .getElementById("gauge")
-    .style.width =
-        gaugeValue + "%";
-
-
-    if(gaugeValue >= 100){
-
-        catchFish();
-
-    }
+  }
 
 }
 
 
-/* =====================================================
-   물고기 선택
-===================================================== */
+function catchFish(){
 
-function chooseFish(){
+  fishing = false;
 
-    const luck =
-        rods[currentRod].luck;
+  $("fishingButton").textContent =
+    "🎣 낚시 시작";
 
+  $("gauge").style.width = "0%";
 
-    const weights = [
+  const fish =
+    chooseFish();
 
-        40,
+  const key =
+    fish.id + "|" + fish.trait;
 
-        15,
+  if(!inventory[key]){
 
-        5*(1+luck/100),
+    inventory[key] = {
+      id:fish.id,
+      trait:fish.trait,
+      count:0
+    };
 
-        1.5*(1+luck/70),
+  }
 
-        .3*(1+luck/55),
+  inventory[key].count++;
 
-        .03*(1+luck/40)
-
-    ];
-
-
-    let total =
-        weights.reduce(
-            (a,b)=>a+b,
-            0
-        );
+  privateCodex[key] = true;
 
 
-    let r =
-        Math.random()*total;
+  /*
+    공용 서버라면 도감만 Firebase에 공유
+  */
+
+  if(serverMode === "public"){
+
+    setPublicCodex(key);
+
+  }
 
 
-    let rarity = 0;
+  const value =
+    getFishPrice(fish);
+
+  $("fishMessage").innerHTML =
+    "🎉 <b>" +
+    fish.rarity.name +
+    " " +
+    traits[fish.trait].emoji +
+    " " +
+    traits[fish.trait].name +
+    " " +
+    fish.name +
+    "</b>을(를) 낚았습니다!<br>" +
+    "<small>예상 판매가 " +
+    value.toLocaleString() +
+    "G</small>";
 
 
-    for(let i=0;i<weights.length;i++){
-
-        r -= weights[i];
-
-        if(r <= 0){
-
-            rarity = i;
-
-            break;
-
-        }
-
-    }
-
-
-    const possible =
-        fishList.filter(
-            fish=>fish.rarity===rarity
-        );
-
-
-    return possible[
-        Math.floor(
-            Math.random()*possible.length
-        )
-    ];
+  updateUI();
 
 }
 
 
-function chooseTrait(){
+function getFishPrice(fish){
 
-    const r =
-        Math.random()*100;
+  const base =
+    fish.rarity.base;
 
+  const indexBonus =
+    1 + fish.id*0.02;
 
-    if(r < .1)
-        return "rainbow";
+  const traitMultiplier =
+    traits[fish.trait].multiplier;
 
-
-    if(r < 1)
-        return "shiny";
-
-
-    if(r < 6)
-        return "different";
-
-
-    return "normal";
+  return Math.floor(
+    base *
+    indexBonus *
+    traitMultiplier
+  );
 
 }
 
 
-/* =====================================================
-   낚시 성공
-================================== */
-
-async function catchFish(){
-
-    if(fishingState !== "catching")
-        return;
-
-
-    fishingState = "idle";
-
-
-    clearTimeout(fishingTimer);
-
-
-    document
-    .getElementById("gaugeWrap")
-    .style.display = "none";
-
-
-    document
-    .getElementById("fishingButton")
-    .textContent =
-        "🎣 낚시하기";
-
-
-    document
-    .getElementById("fishingMessage")
-    .textContent =
-        "🎣 낚시를 시작하세요!";
-
-
-    const fish =
-        chooseFish();
-
-
-    const traitKey =
-        chooseTrait();
-
-
-    const key =
-        fish.id +
-        "|" +
-        traitKey;
-
-
-    /*
-     * 중요:
-     * 개인 서버든 공용 서버든
-     * 잡은 물고기는 자기 인벤토리에 들어감
-     */
-
-    inventory[key] =
-        (inventory[key] || 0) + 1;
-
-
-    /*
-     * 자기 도감도 기록
-     */
-
-    privateCodex[key] = true;
-
-
-    /*
-     * 공용 서버라면
-     * 공유 도감에도 기록
-     */
-
-    if(serverMode === "public"){
-
-        await addPublicCodex(key);
-
-    }
-
-
-    /*
-     * 개인 서버라면 자동 저장
-     */
-
-    if(serverMode === "private"){
-
-        saveAutoSave();
-
-    }
-
-
-    updateUI();
-
-    showCatchPopup(
-        fish,
-        traitKey
-    );
-
-}
-
-
-/* =====================================================
-   획득 팝업
-===================================================== */
-
-function showCatchPopup(
-    fish,
-    traitKey
-){
-
-    const trait =
-        traits[traitKey];
-
-
-    const popup =
-        document.getElementById(
-            "catchPopup"
-        );
-
-
-    document
-    .getElementById("catchBig")
-    .textContent =
-        trait.emoji +
-        fish.emoji;
-
-
-    document
-    .getElementById("catchTitle")
-    .textContent =
-        trait.name +
-        " " +
-        fish.name +
-        " 획득!";
-
-
-    const price =
-        Math.floor(
-            fish.price *
-            trait.multiplier
-        );
-
-
-    document
-    .getElementById("catchSub")
-    .innerHTML =
-
-        `<span style="color:${
-            rarityData[fish.rarity].color
-        }">
-            ${rarityData[fish.rarity].name}
-        </span>
-        · 판매가
-        ${price.toLocaleString()}G`;
-
-
-    popup.classList.add("show");
-
-
-    setTimeout(
-        ()=>{
-            popup.classList.remove("show");
-        },
-        2200
-    );
-
-}
-
-
-/* =====================================================
-   Enter
-===================================================== */
-
-document.addEventListener(
-"keydown",
-event=>{
-
-    if(event.key !== "Enter")
-        return;
-
-
-    if(
-        document.querySelector(
-            ".modal.show"
-        )
-    )
-        return;
-
-
-    if(
-        serverMode === "private" ||
-        serverMode === "public"
-    ){
-
-        event.preventDefault();
-
-        fishingAction();
-
-    }
-
-});
-
-
-/* =====================================================
+/* =========================================================
    공용 도감
-===================================================== */
+========================================================= */
 
-function listenPublicCodex(){
+async function setPublicCodex(key){
 
-    const codexRef =
-        ref(
-            db,
-            "publicServer/codex"
-        );
+  if(!codexRef){
+    return;
+  }
 
+  try{
 
-    onValue(
-        codexRef,
-        snapshot=>{
-
-            publicCodex =
-                snapshot.val() || {};
-
-
-            if(
-                document
-                .getElementById("codexModal")
-                .classList
-                .contains("show")
-            ){
-
-                renderCodex();
-
-            }
-
-        }
+    await set(
+      ref(
+        db,
+        "publicServer/codex/" +
+        encodeURIComponent(key)
+      ),
+      true
     );
 
-}
+  }catch(error){
 
-
-async function addPublicCodex(key){
-
-    if(!myUid)
-        return;
-
-
-    try{
-
-        await set(
-            ref(
-                db,
-                "publicServer/codex/" +
-                encodeURIComponent(key)
-            ),
-            true
-        );
-
-    }catch(error){
-
-        console.error(
-            "공용 도감 저장 실패",
-            error
-        );
-
-    }
-
-}
-
-
-/* =====================================================
-   도감
-===================================================== */
-
-window.openCodex = function(){
-
-    document
-    .getElementById("codexModal")
-    .classList.add("show");
-
-
-    renderCodex();
-
-};
-
-
-window.setCodexTab = function(
-    tab,
-    button
-){
-
-    currentCodexTab = tab;
-
-
-    document
-    .querySelectorAll(".tab")
-    .forEach(
-        b=>b.classList.remove("active")
+    console.error(
+      "CODEX ERROR:",
+      error
     );
 
-
-    button.classList.add("active");
-
-
-    renderCodex();
-
-};
-
-
-function isDiscovered(
-    fish,
-    traitKey
-){
-
-    const key =
-        fish.id +
-        "|" +
-        traitKey;
-
-
-    /*
-     * 공용 서버:
-     * 공용 도감 + 내가 직접 잡은 도감
-     */
-
-    if(serverMode === "public"){
-
-        return !!(
-            publicCodex[
-                encodeURIComponent(key)
-            ] ||
-            privateCodex[key]
-        );
-
-    }
-
-
-    return !!privateCodex[key];
+  }
 
 }
 
 
-function renderCodex(){
+/* =========================================================
+   UI
+========================================================= */
 
-    const grid =
-        document.getElementById(
-            "codexGrid"
-        );
+function updateUI(){
 
+  $("money").textContent =
+    money.toLocaleString();
 
-    grid.innerHTML = "";
-
-
-    let entries = [];
-
-
-    fishList.forEach(fish=>{
-
-        traitOrder.forEach(traitKey=>{
-
-            if(
-                currentCodexTab !== "all" &&
-                currentCodexTab !== traitKey
-            )
-                return;
+  $("rodName").textContent =
+    rods[currentRod].name;
 
 
-            entries.push({
-                fish,
-                traitKey
-            });
+  let count = 0;
 
-        });
+  if(serverMode === "public"){
 
-    });
+    count =
+      Object.keys(publicCodex).length;
 
+  }else{
 
-    let discovered = 0;
+    count =
+      Object.keys(privateCodex).length;
 
+  }
 
-    entries.forEach(
-        ({fish,traitKey})=>{
+  $("codexCount").textContent =
+    count;
 
-            const found =
-                isDiscovered(
-                    fish,
-                    traitKey
-                );
-
-
-            if(found)
-                discovered++;
-
-
-            const trait =
-                traits[traitKey];
-
-
-            const card =
-                document.createElement("div");
-
-
-            card.className =
-                "codexCard" +
-                (found ? "" : " unknown");
-
-
-            if(found){
-
-                const price =
-                    Math.floor(
-                        fish.price *
-                        trait.multiplier
-                    );
-
-
-                card.innerHTML = `
-
-                    <div class="fishEmoji">
-                        ${trait.emoji}${fish.emoji}
-                    </div>
-
-                    <div class="fishName">
-                        ${fish.name}
-                    </div>
-
-                    <div
-                        class="fishRarity"
-                        style="color:${
-                            rarityData[
-                                fish.rarity
-                            ].color
-                        }"
-                    >
-                        ${
-                            rarityData[
-                                fish.rarity
-                            ].name
-                        }
-                    </div>
-
-                    <div class="fishTrait">
-                        ${trait.name}
-                    </div>
-
-                    <div class="fishPrice">
-                        ${price.toLocaleString()}G
-                    </div>
-
-                `;
-
-            }else{
-
-                card.innerHTML = `
-
-                    <div class="fishEmoji">
-                        ❓
-                    </div>
-
-                    <div class="fishName">
-                        ???
-                    </div>
-
-                    <div
-                        class="fishRarity"
-                        style="color:${
-                            rarityData[
-                                fish.rarity
-                            ].color
-                        }"
-                    >
-                        ${
-                            rarityData[
-                                fish.rarity
-                            ].name
-                        }
-                    </div>
-
-                    <div class="fishTrait">
-                        ${trait.emoji}
-                        ${trait.name}
-                    </div>
-
-                `;
-
-            }
-
-
-            grid.appendChild(card);
-
-        }
-    );
-
-
-    document
-    .getElementById("codexCount")
-    .textContent =
-        `${discovered} / ${entries.length} 발견`;
+  renderInventory();
 
 }
-
-
-/* =====================================================
-   인벤토리
-===================================================== */
-
-window.openInventory = function(){
-
-    document
-    .getElementById("inventoryModal")
-    .classList.add("show");
-
-
-    renderInventory();
-
-};
 
 
 function renderInventory(){
 
-    const grid =
-        document.getElementById(
-            "inventoryGrid"
-        );
+  const el =
+    $("inventoryList");
 
+  const entries =
+    Object.values(inventory);
 
-    grid.innerHTML = "";
+  if(entries.length === 0){
 
+    el.textContent =
+      "아직 잡은 물고기가 없습니다.";
 
-    const keys =
-        Object.keys(inventory)
-        .filter(
-            key=>inventory[key] > 0
-        );
+    return;
 
+  }
 
-    if(keys.length === 0){
+  el.innerHTML = "";
 
-        grid.innerHTML =
-            "<p>아직 잡은 물고기가 없습니다.</p>";
+  entries.forEach(item=>{
 
-        return;
-
-    }
-
-
-    keys.forEach(key=>{
-
-        const [
-            fishId,
-            traitKey
-        ] =
-            key.split("|");
-
-
-        const fish =
-            fishList[
-                Number(fishId)
-            ];
-
-
-        const trait =
-            traits[traitKey];
-
-
-        const price =
-            Math.floor(
-                fish.price *
-                trait.multiplier
-            );
-
-
-        const card =
-            document.createElement("div");
-
-
-        card.className =
-            "inventoryCard";
-
-
-        card.innerHTML = `
-
-            <div style="font-size:35px">
-                ${trait.emoji}${fish.emoji}
-            </div>
-
-            <b>
-                ${trait.name}
-                ${fish.name}
-            </b>
-
-            <div>
-                수량 : ${inventory[key]}
-            </div>
-
-            <div>
-                ${price.toLocaleString()}G
-            </div>
-
-        `;
-
-
-        grid.appendChild(card);
-
-    });
-
-}
-
-
-/* =====================================================
-   판매
-===================================================== */
-
-window.openSell = function(){
-
-    document
-    .getElementById("sellModal")
-    .classList.add("show");
-
-
-    renderSell();
-
-};
-
-
-function renderSell(){
-
-    const grid =
-        document.getElementById(
-            "sellGrid"
-        );
-
-
-    grid.innerHTML = "";
-
-
-    const keys =
-        Object.keys(inventory)
-        .filter(
-            key=>inventory[key] > 0
-        );
-
-
-    if(keys.length === 0){
-
-        grid.innerHTML =
-            "<p>판매할 물고기가 없습니다.</p>";
-
-        return;
-
-    }
-
-
-    keys.forEach(key=>{
-
-        const [
-            fishId,
-            traitKey
-        ] =
-            key.split("|");
-
-
-        const fish =
-            fishList[
-                Number(fishId)
-            ];
-
-
-        const trait =
-            traits[traitKey];
-
-
-        const price =
-            Math.floor(
-                fish.price *
-                trait.multiplier
-            );
-
-
-        const card =
-            document.createElement("div");
-
-
-        card.className =
-            "inventoryCard";
-
-
-        card.innerHTML = `
-
-            <div style="font-size:35px">
-                ${trait.emoji}${fish.emoji}
-            </div>
-
-            <b>
-                ${trait.name}
-                ${fish.name}
-            </b>
-
-            <div>
-                수량 : ${inventory[key]}
-            </div>
-
-            <div>
-                1마리
-                ${price.toLocaleString()}G
-            </div>
-
-            <button
-                class="sellBtn"
-                onclick="sellFish(${JSON.stringify(key)})"
-            >
-                1마리 판매
-            </button>
-
-        `;
-
-
-        grid.appendChild(card);
-
-    });
-
-}
-
-
-window.sellFish = function(key){
-
-    if(!inventory[key])
-        return;
-
-
-    const [
-        fishId,
-        traitKey
-    ] =
-        key.split("|");
-
-
-    const fish =
-        fishList[
-            Number(fishId)
-        ];
-
+    const rarity =
+      getRarity(item.id);
 
     const trait =
-        traits[traitKey];
+      traits[item.trait];
 
+    const row =
+      document.createElement("div");
 
-    const price =
-        Math.floor(
-            fish.price *
-            trait.multiplier
-        );
+    row.className = "fishItem";
 
+    const left =
+      document.createElement("span");
 
-    inventory[key]--;
+    left.className =
+      rarity.class;
 
-    money += price;
+    left.textContent =
+      trait.emoji +
+      " " +
+      trait.name +
+      " " +
+      fishNames[item.id];
 
+    const right =
+      document.createElement("span");
 
-    if(inventory[key] <= 0){
+    right.textContent =
+      "×" + item.count;
 
-        delete inventory[key];
+    row.appendChild(left);
 
-    }
+    row.appendChild(right);
 
+    el.appendChild(row);
 
-    /*
-     * 개인/공용 서버 모두
-     * 자기 데이터로 처리
-     */
-
-    if(serverMode === "private"){
-
-        saveAutoSave();
-
-    }
-
-
-    updateUI();
-
-    renderSell();
-
-};
-
-
-/* =====================================================
-   낚싯대 상점
-===================================================== */
-
-window.openRodShop = function(){
-
-    document
-    .getElementById("rodModal")
-    .classList
-    .add("show");
-
-
-    renderRodShop();
-
-};
-
-
-function renderRodShop(){
-
-    const list =
-        document.getElementById(
-            "rodList"
-        );
-
-
-    list.innerHTML = "";
-
-
-    rods.forEach((rod,index)=>{
-
-        const card =
-            document.createElement("div");
-
-
-        card.className =
-            "rodCard" +
-            (
-                index === currentRod
-                ? " current"
-                : ""
-            );
-
-
-        let button = "";
-
-
-        if(index === currentRod){
-
-            button = `
-                <button
-                    class="buyRod"
-                    disabled
-                    style="opacity:.6"
-                >
-                    현재 장착 중
-                </button>
-            `;
-
-        }
-        else if(index === currentRod+1){
-
-            button = `
-
-                <button
-                    class="buyRod"
-                    onclick="buyRod(${index})"
-                >
-                    ${rod.price.toLocaleString()}G 구매
-                </button>
-
-            `;
-
-        }
-        else if(index < currentRod){
-
-            button = `
-                <button
-                    class="buyRod"
-                    disabled
-                    style="opacity:.5"
-                >
-                    구매 완료
-                </button>
-            `;
-
-        }
-        else{
-
-            button = `
-                <button
-                    class="buyRod"
-                    disabled
-                    style="opacity:.4"
-                >
-                    이전 낚싯대 필요
-                </button>
-            `;
-
-        }
-
-
-        card.innerHTML = `
-
-            <h3>
-                ${rod.name}
-            </h3>
-
-            <div>
-                🍀 행운 +${rod.luck}
-            </div>
-
-            <div>
-                ⚡ 게이지 ×${rod.power}
-            </div>
-
-            <div>
-                🏃 속도 ×${rod.speed}
-            </div>
-
-            <div style="margin-top:8px">
-                가격 :
-                ${rod.price.toLocaleString()}G
-            </div>
-
-            ${button}
-
-        `;
-
-
-        list.appendChild(card);
-
-    });
+  });
 
 }
 
 
-window.buyRod = function(index){
+/* =========================================================
+   판매
+========================================================= */
 
-    if(index !== currentRod+1)
-        return;
+window.sellFish = function(){
 
+  let total = 0;
 
-    const rod =
-        rods[index];
+  Object.values(inventory).forEach(item=>{
 
-
-    if(money < rod.price){
-
-        alert(
-            "돈이 부족합니다.\n\n"+
-            "필요한 돈: "+
-            rod.price.toLocaleString()+
-            "G"
-        );
-
-        return;
-
-    }
-
-
-    money -= rod.price;
-
-    currentRod = index;
-
-
-    if(serverMode === "private"){
-
-        saveAutoSave();
-
-    }
-
-
-    updateUI();
-
-    renderRodShop();
-
-
-    alert(
-        rod.name +
-        "을(를) 구매했습니다!"
-    );
-
-};
-
-
-/* =====================================================
-   저장
-===================================================== */
-
-const SAVE_KEY =
-    "fishing_save_slots";
-
-
-const AUTO_KEY =
-    "fishing_auto_save";
-
-
-function getSaveSlots(){
-
-    try{
-
-        return JSON.parse(
-            localStorage.getItem(
-                SAVE_KEY
-            ) || "{}"
-        );
-
-    }catch(e){
-
-        return {};
-
-    }
-
-}
-
-
-function saveCurrentData(){
-
-    return {
-
-        money:money,
-
-        currentRod:currentRod,
-
-        inventory:inventory,
-
-        privateCodex:privateCodex,
-
-        savedAt:
-            new Date().toLocaleString()
-
+    const fish = {
+      id:item.id,
+      name:fishNames[item.id],
+      rarity:getRarity(item.id),
+      trait:item.trait
     };
 
-}
+    total +=
+      getFishPrice(fish) *
+      item.count;
+
+  });
+
+  if(total <= 0){
+
+    toast("판매할 물고기가 없습니다.");
+
+    return;
+
+  }
+
+  money += total;
+
+  inventory = {};
+
+  updateUI();
+
+  if(serverMode === "private"){
+    saveAuto();
+  }
+
+  toast(
+    total.toLocaleString() +
+    "G를 벌었습니다!"
+  );
+
+};
 
 
-function saveAutoSave(){
+/* =========================================================
+   낚싯대 상점
+========================================================= */
 
-    if(serverMode !== "private")
-        return;
+window.openShop = function(){
 
+  const list =
+    $("rodList");
 
-    localStorage.setItem(
-        AUTO_KEY,
-        JSON.stringify(
-            saveCurrentData()
-        )
-    );
+  list.innerHTML = "";
 
-}
+  rods.forEach((rod,index)=>{
 
+    const card =
+      document.createElement("div");
 
-function loadAutoSave(){
+    card.className =
+      "rodCard";
 
-    try{
+    let buttonText = "";
 
-        const raw =
-            localStorage.getItem(
-                AUTO_KEY
-            );
+    if(index === currentRod){
 
+      buttonText = "현재 장착 중";
 
-        if(!raw){
+    }else if(index < currentRod){
 
-            money = 0;
+      buttonText = "구매 완료";
 
-            currentRod = 0;
+    }else{
 
-            inventory = {};
+      buttonText =
+        rod.price.toLocaleString() +
+        "G 구매";
 
-            privateCodex = {};
+    }
 
-            return;
+    card.innerHTML = `
+      <strong>🎣 ${rod.name}</strong>
+      가격: ${rod.price.toLocaleString()}G<br>
+      행운: +${rod.luck}<br>
+      힘: ×${rod.power}<br>
+      속도: ×${rod.speed}
+    `;
+
+    const button =
+      document.createElement("button");
+
+    button.textContent =
+      buttonText;
+
+    button.disabled =
+      index <= currentRod ||
+      index !== currentRod+1 ||
+      money < rod.price;
+
+    if(index === currentRod+1){
+
+      button.disabled =
+        money < rod.price;
+
+      button.onclick = ()=>{
+
+        if(money < rod.price){
+
+          toast("돈이 부족합니다.");
+
+          return;
 
         }
 
+        money -= rod.price;
 
-        applySaveData(
-            JSON.parse(raw)
+        currentRod = index;
+
+        updateUI();
+
+        closeModal("shopModal");
+
+        toast(
+          rod.name +
+          "을(를) 구매했습니다!"
         );
 
-    }catch(e){
+        if(serverMode === "private"){
+          saveAuto();
+        }
 
-        console.error(e);
+      };
 
     }
+
+    card.appendChild(button);
+
+    list.appendChild(card);
+
+  });
+
+  $("shopModal").style.display =
+    "flex";
+
+};
+
+
+/* =========================================================
+   도감
+========================================================= */
+
+window.openCodex = function(){
+
+  const list =
+    $("codexList");
+
+  list.innerHTML = "";
+
+  const shared =
+    serverMode === "public";
+
+  $("codexDescription").textContent =
+    shared
+      ? "🌐 공용 서버에서는 모든 플레이어가 발견한 도감을 공유합니다."
+      : "🔒 개인 서버 도감입니다.";
+
+  for(let i=0;i<100;i++){
+
+    const rarity =
+      getRarity(i);
+
+    Object.keys(traits).forEach(
+      traitKey=>{
+
+        const key =
+          i + "|" + traitKey;
+
+        const found =
+          shared
+            ? !!publicCodex[
+                encodeURIComponent(key)
+              ]
+            : !!privateCodex[key];
+
+        const item =
+          document.createElement("div");
+
+        item.className =
+          "codexItem " +
+          (found ? "found" : "");
+
+        if(found){
+
+          item.innerHTML =
+            rarity.name +
+            " " +
+            traits[traitKey].emoji +
+            " " +
+            traits[traitKey].name +
+            "<br>" +
+            fishNames[i];
+
+        }else{
+
+          item.textContent =
+            "???";
+
+        }
+
+        list.appendChild(item);
+
+      }
+    );
+
+  }
+
+  $("codexModal").style.display =
+    "flex";
+
+};
+
+
+/* =========================================================
+   모달
+========================================================= */
+
+window.closeModal = function(id){
+
+  $(id).style.display =
+    "none";
+
+};
+
+
+/* =========================================================
+   자동 저장
+========================================================= */
+
+function getSaveData(){
+
+  return {
+    money:money,
+    currentRod:currentRod,
+    inventory:inventory,
+    privateCodex:privateCodex,
+    savedAt:new Date().toLocaleString()
+  };
 
 }
 
 
-function applySaveData(data){
+window.saveAuto = function(){
+
+  if(serverMode !== "private"){
+    return;
+  }
+
+  localStorage.setItem(
+    autoSaveKey,
+    JSON.stringify(
+      getSaveData()
+    )
+  );
+
+};
+
+
+function loadAuto(){
+
+  const raw =
+    localStorage.getItem(
+      autoSaveKey
+    );
+
+  if(!raw){
+
+    money = 0;
+
+    currentRod = 0;
+
+    inventory = {};
+
+    privateCodex = {};
+
+    return;
+
+  }
+
+  try{
+
+    const data =
+      JSON.parse(raw);
 
     money =
-        Number(data.money) || 0;
-
+      data.money || 0;
 
     currentRod =
-        Number(data.currentRod) || 0;
-
-
-    if(
-        currentRod < 0 ||
-        currentRod >= rods.length
-    ){
-
-        currentRod = 0;
-
-    }
-
+      data.currentRod || 0;
 
     inventory =
-        data.inventory || {};
-
+      data.inventory || {};
 
     privateCodex =
-        data.privateCodex ||
-        data.discovered ||
-        {};
+      data.privateCodex || {};
 
+  }catch(error){
 
-    updateUI();
+    console.error(error);
+
+  }
 
 }
 
 
-/* =====================================================
+/* =========================================================
    이름 저장
-===================================================== */
+========================================================= */
 
 window.openSaveModal = function(){
 
-    if(serverMode !== "private")
-        return;
+  if(serverMode !== "private"){
+    return;
+  }
 
+  renderSaveList();
 
-    document
-    .getElementById("saveModal")
-    .classList
-    .add("show");
-
-
-    renderSaveList();
+  $("saveModal").style.display =
+    "flex";
 
 };
 
 
-window.saveNamedGame = function(){
+window.saveNamed = function(){
 
-    const input =
-        document.getElementById(
-            "saveNameInput"
-        );
+  const name =
+    $("saveName").value.trim();
 
+  if(!name){
 
-    const name =
-        input.value.trim();
+    toast("저장 이름을 입력하세요.");
 
+    return;
 
-    if(!name){
+  }
 
-        alert(
-            "저장 이름을 입력해주세요."
-        );
+  saveSlots[name] =
+    getSaveData();
 
-        return;
+  localStorage.setItem(
+    "fishing_save_slots",
+    JSON.stringify(saveSlots)
+  );
 
-    }
+  $("saveName").value = "";
 
+  renderSaveList();
 
-    const saves =
-        getSaveSlots();
-
-
-    saves[name] =
-        saveCurrentData();
-
-
-    localStorage.setItem(
-        SAVE_KEY,
-        JSON.stringify(saves)
-    );
-
-
-    input.value = "";
-
-
-    renderSaveList();
-
-
-    alert(
-        `"${name}" 저장 완료!`
-    );
+  toast("저장했습니다.");
 
 };
 
 
 function renderSaveList(){
 
-    const box =
-        document.getElementById(
-            "saveList"
-        );
+  const el =
+    $("saveList");
 
+  el.innerHTML = "";
 
-    box.innerHTML = "";
+  const names =
+    Object.keys(saveSlots);
 
+  if(names.length === 0){
 
-    const saves =
-        getSaveSlots();
+    el.textContent =
+      "저장된 데이터가 없습니다.";
 
+    return;
 
-    const names =
-        Object.keys(saves);
+  }
 
+  names.forEach(name=>{
 
-    if(names.length === 0){
+    const row =
+      document.createElement("div");
 
-        box.innerHTML =
-            "<p>저장된 게임이 없습니다.</p>";
+    row.className =
+      "saveRow";
 
-        return;
+    const label =
+      document.createElement("span");
 
-    }
+    label.style.flex = "1";
 
+    label.textContent =
+      name;
 
-    names.forEach(name=>{
+    const del =
+      document.createElement("button");
 
-        const data =
-            saves[name];
+    del.textContent =
+      "삭제";
 
+    del.style.background =
+      "#d94343";
 
-        const item =
-            document.createElement("div");
+    del.onclick = ()=>{
 
+      delete saveSlots[name];
 
-        item.className =
-            "saveItem";
+      localStorage.setItem(
+        "fishing_save_slots",
+        JSON.stringify(saveSlots)
+      );
 
+      renderSaveList();
 
-        item.innerHTML = `
+    };
 
-            <div>
-                <b>
-                    ${escapeHTML(name)}
-                </b>
+    row.appendChild(label);
 
-                <br>
+    row.appendChild(del);
 
-                <small>
-                    💰
-                    ${Number(
-                        data.money || 0
-                    ).toLocaleString()}G
-                    ·
-                    ${escapeHTML(
-                        data.savedAt || ""
-                    )}
-                </small>
-            </div>
+    el.appendChild(row);
 
-            <div class="saveButtons">
-
-                <button
-                    class="loadBtn"
-                    onclick="loadSaveByName(${JSON.stringify(name)})"
-                >
-                    불러오기
-                </button>
-
-                <button
-                    class="deleteBtn"
-                    onclick="deleteSaveByName(${JSON.stringify(name)})"
-                >
-                    🗑️ 삭제
-                </button>
-
-            </div>
-
-        `;
-
-
-        box.appendChild(item);
-
-    });
+  });
 
 }
 
 
-window.loadSaveByName = function(name){
-
-    const saves =
-        getSaveSlots();
-
-
-    if(!saves[name]){
-
-        alert(
-            "저장 데이터를 찾을 수 없습니다."
-        );
-
-        return;
-
-    }
-
-
-    applySaveData(
-        saves[name]
-    );
-
-
-    saveAutoSave();
-
-
-    closeModal("saveModal");
-
-
-    alert(
-        `"${name}" 불러오기 완료!`
-    );
-
-};
-
-
-window.deleteSaveByName = function(name){
-
-    if(
-        !confirm(
-            `"${name}" 저장을 삭제할까요?`
-        )
-    )
-        return;
-
-
-    const saves =
-        getSaveSlots();
-
-
-    delete saves[name];
-
-
-    localStorage.setItem(
-        SAVE_KEY,
-        JSON.stringify(saves)
-    );
-
-
-    renderSaveList();
-
-};
-
-
-/* =====================================================
+/* =========================================================
    불러오기
-===================================================== */
+========================================================= */
 
 window.openLoadModal = function(){
 
-    if(serverMode !== "private")
-        return;
+  if(serverMode !== "private"){
+    return;
+  }
 
+  renderLoadList();
 
-    document
-    .getElementById("loadModal")
-    .classList
-    .add("show");
-
-
-    renderLoadList();
+  $("loadModal").style.display =
+    "flex";
 
 };
 
 
 function renderLoadList(){
 
-    const box =
-        document.getElementById(
-            "loadList"
-        );
+  const el =
+    $("loadList");
 
+  el.innerHTML = "";
 
-    box.innerHTML = "";
+  const names =
+    Object.keys(saveSlots);
 
+  if(names.length === 0){
 
-    const saves =
-        getSaveSlots();
+    el.textContent =
+      "저장된 데이터가 없습니다.";
 
+    return;
 
-    const names =
-        Object.keys(saves);
+  }
 
+  names.forEach(name=>{
 
-    if(names.length === 0){
+    const row =
+      document.createElement("div");
 
-        box.innerHTML =
-            "<p>저장된 게임이 없습니다.</p>";
+    row.className =
+      "saveRow";
 
-        return;
+    const button =
+      document.createElement("button");
 
-    }
+    button.style.flex = "1";
 
+    button.textContent =
+      "📂 " + name;
 
-    names.forEach(name=>{
+    button.onclick = ()=>{
 
-        const data =
-            saves[name];
+      const data =
+        saveSlots[name];
 
+      money =
+        data.money || 0;
 
-        const item =
-            document.createElement("div");
+      currentRod =
+        data.currentRod || 0;
 
+      inventory =
+        data.inventory || {};
 
-        item.className =
-            "saveItem";
+      privateCodex =
+        data.privateCodex || {};
 
+      updateUI();
 
-        item.innerHTML = `
+      closeModal("loadModal");
 
-            <div>
-                <b>
-                    ${escapeHTML(name)}
-                </b>
+      toast(
+        name +
+        " 저장 데이터를 불러왔습니다."
+      );
 
-                <br>
+    };
 
-                <small>
-                    💰
-                    ${Number(
-                        data.money || 0
-                    ).toLocaleString()}G
-                </small>
-            </div>
+    const del =
+      document.createElement("button");
 
-            <div class="saveButtons">
+    del.textContent =
+      "삭제";
 
-                <button
-                    class="loadBtn"
-                    onclick="loadSaveFromLoadModal(${JSON.stringify(name)})"
-                >
-                    불러오기
-                </button>
+    del.style.background =
+      "#d94343";
 
-                <button
-                    class="deleteBtn"
-                    onclick="deleteSaveFromLoadModal(${JSON.stringify(name)})"
-                >
-                    🗑️ 삭제
-                </button>
+    del.onclick = ()=>{
 
-            </div>
+      delete saveSlots[name];
 
-        `;
+      localStorage.setItem(
+        "fishing_save_slots",
+        JSON.stringify(saveSlots)
+      );
 
+      renderLoadList();
 
-        box.appendChild(item);
+    };
 
-    });
+    row.appendChild(button);
+
+    row.appendChild(del);
+
+    el.appendChild(row);
+
+  });
 
 }
 
 
-window.loadSaveFromLoadModal =
-function(name){
+/* =========================================================
+   서버 나가기
+========================================================= */
 
-    const saves =
-        getSaveSlots();
+window.leaveGame = async function(){
 
+  if(
+    serverMode === "public" &&
+    playerRef
+  ){
 
-    if(!saves[name]){
+    try{
 
-        alert(
-            "저장 데이터를 찾을 수 없습니다."
-        );
+      await remove(playerRef);
 
-        return;
+    }catch(error){
+
+      console.error(error);
 
     }
 
+  }
 
-    applySaveData(
-        saves[name]
-    );
-
-
-    saveAutoSave();
-
-
-    closeModal("loadModal");
-
-
-    alert(
-        `"${name}" 불러오기 완료!`
-    );
+  location.reload();
 
 };
 
 
-window.deleteSaveFromLoadModal =
-function(name){
-
-    if(
-        !confirm(
-            `"${name}" 저장을 삭제할까요?`
-        )
-    )
-        return;
-
-
-    const saves =
-        getSaveSlots();
-
-
-    delete saves[name];
-
-
-    localStorage.setItem(
-        SAVE_KEY,
-        JSON.stringify(saves)
-    );
-
-
-    renderLoadList();
-
-};
-
-
-/* =====================================================
-   UI
-===================================================== */
-
-function updateUI(){
-
-    document
-    .getElementById("moneyText")
-    .textContent =
-        money.toLocaleString();
-
-
-    document
-    .getElementById("rodText")
-    .textContent =
-        rods[currentRod].name;
-
-
-    updateMyPlayerVisual();
-
-}
-
-
-/* =====================================================
-   모달 닫기
-===================================================== */
-
-window.closeModal = function(id){
-
-    document
-    .getElementById(id)
-    .classList
-    .remove("show");
-
-};
-
-
-/* =====================================================
-   바깥 클릭으로 닫기
-===================================================== */
+/* =========================================================
+   키보드
+========================================================= */
 
 document.addEventListener(
-"click",
-event=>{
+  "keydown",
+  (event)=>{
 
-    if(
-        event.target.classList
-        .contains("modal")
-    ){
+    /*
+      Enter = 낚시
+    */
 
-        event.target
-        .classList
-        .remove("show");
+    if(event.key === "Enter"){
+
+      event.preventDefault();
+
+      if(
+        $("game").style.display !== "none"
+      ){
+
+        fishClick();
+
+      }
 
     }
 
-});
+
+    /*
+      공용 서버 A/D 이동
+    */
+
+    if(
+      serverMode === "public"
+    ){
+
+      if(
+        event.key.toLowerCase() === "a"
+      ){
+
+        movePlayer(-1);
+
+      }
+
+      if(
+        event.key.toLowerCase() === "d"
+      ){
+
+        movePlayer(1);
+
+      }
+
+    }
+
+  }
+);
 
 
-/* =====================================================
-   초기 UI
-===================================================== */
+/* =========================================================
+   닉네임 Enter
+========================================================= */
 
-updateUI();
+$("nickname").addEventListener(
+  "keydown",
+  (event)=>{
+
+    if(event.key === "Enter"){
+
+      selectPublic();
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   시작
+========================================================= */
+
+setServerStatus(
+  "서버 선택 대기",
+  "offline"
+);
 
 </script>
 
